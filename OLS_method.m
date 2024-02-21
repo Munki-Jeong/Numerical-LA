@@ -9,16 +9,22 @@ function driver
         0.75, 1.422
     ];
 
-    coeff_store = cell(3, 1); % Corrected to store coefficients for each degree
+    coeff_store = cell(3, 1); % store coefficients for each degree
+    errors = zeros(3, 1); % Store errors for each degree
 
     for n = 1:3
         coeff = main(n, data);
         disp(['degree: ', num2str(n)]);
         disp(coeff);
-        coeff_store{n} = coeff; % Corrected to properly store coefficients
+        coeff_store{n} = coeff; 
+        errors(n) = calculateError(coeff, data);
     end
 
-    plotPolynomials(data, coeff_store); % Call plotting function with correct arguments
+    plotPolynomials(data, coeff_store); % Call plotting function
+    disp('Errors for polynomial degrees 1 to 3:');
+    for n = 1:length(errors)
+        disp(['Error for degree ', num2str(n), ': ', num2str(errors(n))]);
+    end
 end
 
 function coeff = main(degree, data)
@@ -50,20 +56,29 @@ function RHS_matrix = Cal_RHS(degree, data)
     end
 end
 
+
+function error = calculateError(coeff, data)
+    x = data(:,1);
+    y = data(:,2);
+    n = length(coeff) - 1; 
+    poly_vals = polyval(flip(coeff), x);
+    error = sum((y - poly_vals).^2); 
+end
+
 function plotPolynomials(data, coeff_store)
     x = data(:,1);
     y = data(:,2);
     
-    figure; % Start a new figure
-    scatter(x, y, 'filled'); % Plot original data points
+    figure; 
+    scatter(x, y, 'filled'); 
     hold on;
     
-    colors = ['r', 'g', 'b']; % Define colors for different degrees
+    colors = ['r', 'g', 'b']; 
     
     for i = 1:length(coeff_store)
         coeffs = coeff_store{i};
-        poly = @(x) polyval(flip(coeffs), x); % Define polynomial using coeffs
-        fplot(poly, [min(x), max(x)], colors(i)); % Plot polynomial
+        poly = @(x) polyval(flip(coeffs), x); 
+        fplot(poly, [min(x), max(x)], colors(i)); 
     end
     
     hold off;
